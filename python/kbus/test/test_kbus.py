@@ -4,7 +4,7 @@ Intended for use with (for instance) nose -- so, for instance::
 
     $ cd kernel_module
     $ make
-    $ nosetests test_kbus.py -d
+    $ nosetests kbus -d
     ...........................
     ----------------------------------------------------------------------
     Ran 27 tests in 2.048s
@@ -13,7 +13,7 @@ Intended for use with (for instance) nose -- so, for instance::
 
 To get the doctests (for instance, in kbus.py's Message) as well, try::
 
-    nosetests kbus.py test_kbus.py -d --doctest-tests --with-doctest
+    nosetests kbus -d --doctest-tests --with-doctest
 """
 
 # ***** BEGIN LICENSE BLOCK *****
@@ -67,7 +67,9 @@ from kbus.messages import _MessageHeaderStruct
 NUM_DEVICES = 3
 
 def setup_module():
-    retcode = system('sudo insmod kbus.ko kbus_num_devices=%d'%NUM_DEVICES)
+    # This path assumes that we are running the tests in the ``kbus/python``
+    # directory, and that the KBUS kernel module has been built in ``kbus/kbus``.
+    retcode = system('sudo insmod ../kbus/kbus.ko kbus_num_devices=%d'%NUM_DEVICES)
     try:
         assert retcode == 0
         # Via the magic of hotplugging, that should cause our device to exist
