@@ -6,39 +6,38 @@ In kbus_defns:
 * Changed start_guard and end_guard - they now correspond to "Kbus" and
   "subK", instead of "kbus" and "subk". Which seems a reasonable change.
 
-* New datastructure kbus_ksock_id. This is the same shape as kbus_msg_id, but
+* New datastructure kbus_orig_from. This is the same shape as kbus_msg_id, but
   kept separate because it really *is* a new type of data.
 
-.. note:: The network_id part of a kbus_ksock_id may only be non-zero in two
-   cases:
+* New fields in a message header, orig_from and extra (the latter is always
+  zeroed by KBUS)
 
-   1. It is the 'from' field in a Reply, and that Reply has come via a Limpet,
-      from another network.
+In kbus.c, always zero the "extras" field.
 
-      PROBABLY: enforce this: only a Reply may have a network_id in its 'from'
+Propagate (but don't touch) the orig_from field. Print it out if necessary.
 
-   2. It is the 'to' field in a (stateful) request, in which case it is a copy
-      of a 'from' field from a previous Reply, which came from another
-      network.
+In Python ksock.py:
 
-      PROBABLY: enforce this: only a Request may have a network_id in its 'to'
-
-   This all means that (almost all of the time) KBUS itself, internally, need
-   only worry about the "local" element of the kbus_ksock_id, and thus can
-   continue to pass around just a uint32_t value.
-
-   It also means that any synthetic message (generated internally by KBUS)
-   will be local, and need not worry about the network id. I think.
-
-Proposed:
-
-In the Python code, KSock should become Ksock, which is (a) easier to type (!)
-and (b) follows PEP 8 more closely.
+* Change KSock to Ksock throughout (better PEP 8, easier to type)
 
 In Python messages.py:
 
 * Changed START_GUARD and END_GUARD - they now correspond to "Kbus" and
   "subK", instead of "kbus" and "subk". Which matches the C.
+
+* Add orig_from and extra to the message datastructure. Otherwise ignore
+  extra.
+
+* New class OrigFrom for orig_from
+
+* The Message __repr__ now only shows arguments that are set, rather than
+  producing a maximal argument list for the representation.
+
+        NB: This means many of the doctests will need changing...
+
+
+
+
 
 Don't forget to look at the C library as well...
 
